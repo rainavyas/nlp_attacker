@@ -43,6 +43,10 @@ if __name__ == "__main__":
     with open('CMDs/attack.cmd', 'a') as f:
         f.write(' '.join(sys.argv)+'\n')
 
+    # Load model
+    model = select_model(args.model_name, model_path=args.model_path, num_labels=args.num_classes, prompt_finetune=args.prompt_finetune)
+    # model.to(device)
+   
     # Load the relevant data
     if args.data_part == 'test':
         data = select_data(args, train=False)
@@ -53,12 +57,9 @@ if __name__ == "__main__":
     if args.batch:
         data = data[args.start:args.end]
 
-    # Load model
-    model = select_model(args.model_name, model_path=args.model_path, num_labels=args.num_classes, prompt_finetune=args.prompt_finetune)
-    # model.to(device)
 
     # Attack all samples
-    att_data = Attacker.attack_all(data, model, method=args.method)
+    att_data = Attacker.attack_all(data, model, method=args.attack_method)
 
     # Save
     with open(args.out_path, 'w') as f:

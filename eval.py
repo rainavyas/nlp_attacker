@@ -21,7 +21,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('--model_paths', type=str, nargs='+', required=True, help='e.g. experiments/trained_models/my_model.pt')
     commandLineParser.add_argument('--model_names', type=str, nargs='+', required=True, help='e.g. roberta-large')
     commandLineParser.add_argument('--data_name', type=str, required=True, help='e.g. sst-glue')
-    commandLineParser.add_argument('--bs', type=int, default=8, help="Specify batch size")
+    commandLineParser.add_argument('--bs', type=int, default=1, help="Specify batch size")
     commandLineParser.add_argument('--force_cpu', action='store_true', help='force cpu use')
     commandLineParser.add_argument('--num_classes', type=int, default=2, help="Specify number of classes")
     args = commandLineParser.parse_args()

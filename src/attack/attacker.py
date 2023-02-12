@@ -1,8 +1,8 @@
 import textattack
-from textattack.attack_recipes.textfooler_jin_2019 import TextFoolerJin2019
 from tqdm import tqdm
 import torch
 
+from textattack.attack_recipes.textfooler_jin_2019 import TextFoolerJin2019
 from .model_wrapper import PyTorchModelWrapper
 
 class Attacker():
@@ -25,9 +25,7 @@ class Attacker():
         # Add attacked predicted class
         print('Adding attacked predicted class')
         cls._pred_class(data, model, text_key='att_text', lab_key='att_pred_label')
-
         return data
-            
 
 
     @staticmethod
