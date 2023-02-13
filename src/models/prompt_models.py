@@ -54,15 +54,14 @@ class PromptFinetuning(torch.nn.Module):
         for param in self.transformer.lm_head.parameters():
             param.requires_grad = False
 
-    def predict(self, sentences, output_attentions=False, output_hidden_states=False, return_dict=False, device=torch.device('cpu')):
+    def predict(self, sentences, device=torch.device('cpu')):
 
         ml = self.tokenizer.model_max_length if self.tokenizer.model_max_length < 5000 else 512
-        inputs = self.tokenizer(sentences, padding=True, max_length=ml, truncation=True, return_tensors="pt")
+        inputs = self.tokenizer(sentences, max_length=ml, truncation=True, return_tensors="pt")
         input_ids = inputs['input_ids']
-        attention_mask = inputs['attention_mask']
+        # attention_mask = inputs['attention_mask']
 
         input_ids = input_ids.to(device)
-        attention_mask = attention_mask.to(device)
+        # attention_mask = attention_mask.to(device)
         
-        return(self.transformer(input_ids, attention_mask, output_attentions=output_attentions,
-                 output_hidden_states=output_hidden_states, return_dict=return_dict))
+        return(self.forward(input_ids))
