@@ -18,7 +18,9 @@ class PromptFinetuning(torch.nn.Module):
         self.tokenizer   = load_tokenizer(trans_name)
         self.label_ids   = [self.tokenizer(word).input_ids[1] for word in label_words]
 
-        self.prompt_ids = self.tokenizer.convert_tokens_to_ids(['It', 'was', self.tokenizer.mask_token, '.'])
+        prompt_ids = self.tokenizer.encode(f' It was {self.tokenizer.mask_token}.')
+        self.prompt_ids = prompt_ids[1:-1]
+
         
     def forward(
         self,
