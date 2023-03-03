@@ -3,6 +3,7 @@ from tqdm import tqdm
 import torch
 
 from textattack.attack_recipes.textfooler_jin_2019 import TextFoolerJin2019
+from textattack.attack_recipes.bae_garg_2019 import BAEGarg2019
 from .model_wrapper import PyTorchModelWrapper
 
 class Attacker():
@@ -32,6 +33,8 @@ class Attacker():
     def _construct_attack(model_wrapper, method):
         if method == 'textfooler':
             attack = TextFoolerJin2019.build(model_wrapper)
+        elif method == 'bae':
+            attack = BAEGarg2019.build(model_wrapper)
         return attack
 
     @staticmethod
