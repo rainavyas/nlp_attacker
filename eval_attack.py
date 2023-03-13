@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.stats import entropy
 import numpy as np
+from nltk.translate.bleu_score import sentence_bleu
+from nltk import word_tokenize
+from nltk.translate import meteor
+from statistics import mean, stdev
 
 from src.models.model_selector import select_model
 
@@ -31,13 +35,31 @@ def fool_rate(data):
                 fooled+=1
     return fooled/total
 
- 
+def calculate_bleu(candidate, reference):
+    '''
+    candidate, reference: generated and ground-truth sentences
+    '''
+    reference = word_tokenize(reference)
+    candidate = word_tokenize(candidate)
+    score = sentence_bleu(reference, candidate)
+    return score 
+
+def calculate_meteor(candidate, reference):
+  '''
+  candidate, reference: tokenized list of words in the sentence
+  '''
+  reference = word_tokenize(reference)
+  candidate = word_tokenize(candidate)
+  meteor_score = round(meteor([candidate],reference), 4)
+  return meteor_score
+
 if __name__ == "__main__":
 
     # Get command line arguments
     commandLineParser = argparse.ArgumentParser()
-    commandLineParser.add_argument('--json_path', type=str, required=True, help='saved .json file')
+    commandLineParser.add_argument('--json_path', type=str, nargs='+', required=True, help='saved .json file(s)')
     commandLineParser.add_argument('--fool', action='store_true', help='calulate fooling rate')
+    commandLineParser.add_argument('--agreement', action='store_true', help='calulate agreement in adv examples')
     commandLineParser.add_argument('--entropy', action='store_true', help='calulate fooling rate as retention curved of samples ranked by entropy')
     commandLineParser.add_argument('--plot_base', type=str, required=False, help='path to save output file')
     commandLineParser.add_argument('--model_path', type=str, required=False, help='trained model path')
@@ -54,19 +76,37 @@ if __name__ == "__main__":
         f.write(' '.join(sys.argv)+'\n')
     
     # load the json object
-    with open(args.json_path, 'r') as f:
-        data = json.load(f)
+    datas = []
+    for json_path in args.json_path:
+        with open(json_path, 'r') as f:
+            datas.append(json.load(f))
+    if len(args.json_path) == 1:
+        data = datas[0]
     
     if args.fool:
-        print(f'Accuracy of original predictions\t{accuracy(data)}')
-        print(f"Accuracy of attacked predictions\t{accuracy(data, target='att_pred_label')}")
-        print(f'Fooling Rate\t{fool_rate(data)}')
+        for d in datas:
+            print(f'Accuracy of original predictions\t{accuracy(d)}')
+            print(f"Accuracy of attacked predictions\t{accuracy(d, target='att_pred_label')}")
+            print(f'Fooling Rate\t{fool_rate(d)}')
+            print()
     
+    if args.agreement:
+        # assume two files only
+        # calculate agreement between the generated adversarial examples
+        # consider only correctly classified points and successful adversarial attacks
+        meteors = []
+        for c,r in zip(*datas):
+            if (c['label'] == c['pred_label']) and ((c['att_pred_label'] != c['label']) and (r['att_pred_label'] != r['label'])):
+                met = calculate_meteor(c['att_text'],r['att_text'])
+                meteors.append(met)
+        print(f'Avg Meteor {mean(meteors)}+-{stdev(meteors)}')
+
     if args.entropy:
         # check to see if output predictions have been cached already
-        basename = args.json_path
+        # assume single json path
+        basename = args.json_path[0]
         basename = f'{basename.split(".")[0]}_probs.json'
-        if 'probs' in args.json_path:
+        if 'probs' in args.json_path[0]:
             print('Using cached probability predictions')
         elif os.path.exists(basename):
             print('Found cached probability predictions')
