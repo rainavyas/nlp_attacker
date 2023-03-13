@@ -3,15 +3,20 @@ Analyze attack outputs
 
 1) For input json attack file (e.g. textfooler), check what fraction satisfy the constraints of attack (e.g. bae)
 '''
+import sys
+import os
+import argparse
+import json
 from tqdm import tqdm
+
 from src.attack.constraints import Constraint
 
 def constraints_satisfied(data, attack_method='bae'):
-    checker = Constraint()
+    checker = Constraint(attack_method)
     satisfied = 0
     for d in tqdm(data):
-        if checker.check_constraint(d['text'], d['att_text'], attack_method):
-            satisifed +=1
+        if checker.check_constraint(d['text'], d['att_text']):
+            satisfied +=1
     return satisifed/len(data)
 
 if __name__ == "__main__":
