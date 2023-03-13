@@ -4,6 +4,8 @@ import torch
 
 from textattack.attack_recipes.textfooler_jin_2019 import TextFoolerJin2019
 from textattack.attack_recipes.bae_garg_2019 import BAEGarg2019
+from textattack.attack_recipes.iga_wang_2019 import IGAWang2019
+from textattack.attack_recipes.pwws_ren_2019 import PWWSRen2019
 from .model_wrapper import PyTorchModelWrapper
 
 class Attacker():
@@ -35,6 +37,10 @@ class Attacker():
             attack = TextFoolerJin2019.build(model_wrapper)
         elif method == 'bae':
             attack = BAEGarg2019.build(model_wrapper)
+        elif method == 'iga':
+            attack = IGAWang2019.build(model_wrapper)
+        elif method == 'pwws':
+            attack = PWWSRen2019.build(model_wrapper)
         return attack
 
     @staticmethod
