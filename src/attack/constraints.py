@@ -38,11 +38,17 @@ class Constraint():
         return True
     
     def _bae_constraints(self):
+        '''
+        NOTE: BAE attacks may fail this constraint as attack time USE constraint
+        is applied to a window of 15 tokens around the perturbed word, whilst
+        here we apply the USE constraint to the full text input.
+        '''
         # Do NOT include pre-transformation constraints
         # constraints = [RepeatModification(), StopwordModification()]
         # constraints.append(PartOfSpeech(allow_verb_noun_swap=True))
         use_constraint = UniversalSentenceEncoder(
-            threshold=0.936338023,
+            # threshold=0.936338023, # for window of size 15
+            threshold=0.80,
             metric="cosine",
             compare_against_original=True,
             # window_size=15, # original window size used by BAE - applied at every change index

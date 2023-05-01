@@ -56,7 +56,7 @@ class PromptFinetuning(torch.nn.Module):
         for param in self.transformer.lm_head.parameters():
             param.requires_grad = False
 
-    def predict(self, sentences, device=torch.device('cpu')):
+    def predict(self, sentences, device=torch.device('cpu'), all_logits=False):
 
         ml = self.tokenizer.model_max_length if self.tokenizer.model_max_length < 5000 else 512
         inputs = self.tokenizer(sentences, max_length=ml, truncation=True, return_tensors="pt")
@@ -65,5 +65,21 @@ class PromptFinetuning(torch.nn.Module):
 
         input_ids = input_ids.to(device)
         # attention_mask = attention_mask.to(device)
+
+        if all_logits:
+            # get logit over entire vocab for masked token - not just specific good/bad word pair
+            # add prompt ids
+            input_ids = torch.LongTensor([self.add_prompt_ids(ids.cpu().tolist()) for ids in input_ids])
+            mask_positions = torch.LongTensor([ids.cpu().tolist().index(self.tokenizer.mask_token_id) for ids in input_ids])
+
+            # encode everything and get MLM probabilities
+            trans_output = self.transformer(
+                input_ids=input_ids,
+            )
+
+            # select MLM probs of the masked positions, only for the label ids
+            mask_pos_logits = trans_output.logits[torch.arange(input_ids.size(0)), mask_positions]
+            return mask_pos_logits
         
-        return(self.forward(input_ids))
+        else:
+            return(self.forward(input_ids))
