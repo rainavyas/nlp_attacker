@@ -2,7 +2,7 @@
 from .base_models import TransformerModel
 from .prompt_models import PromptFinetuning
 from .seq2seq_prompting import Seq2seqPrompting
-import .pre_trained_trans
+from . import pre_trained_trans
 import torch
 
 def select_model(model_name='bert-base-uncased', model_path=None, pretrained=True, num_labels=2, prompt_finetune=False):
